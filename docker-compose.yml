@@ -1,0 +1,47 @@
+version: '3'
+services:
+  frontend:
+    container_name: frontend
+    build:
+      dockerfile: ./frontend/Dockerfile
+      context: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app
+      - type: volume
+        source: node_modules
+        target: /app/node_modules
+    command: npm run dev
+  
+  backend:
+    container_name: backend
+    build:
+      dockerfile: ./backend/Dockerfile
+      context: .
+    volumes:
+      - type: bind
+        source: ./backend
+        target: /app
+    ports:
+      - 8000:8000
+  
+  db:
+    container_name: database
+    image: mysql:8.0
+    platform: linux/x86_64
+    environment:
+      MYSQL_ROOT_AUTHENTICATION_PLUGIN: 'caching_sha2_password'
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: 'data'
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - 33306:3306
+
+volumes:
+  mysql_data:
+  node_modules:
