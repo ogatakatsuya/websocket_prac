@@ -33,6 +33,19 @@ const RoomList = () => {
     const enterChatRoom = (socketId: string) => {
         router.push(`/chat/${socketId}`)
     }
+
+    const deleteChatRoom = async (room_id: number) => {
+        const res = await fetch(`http://localhost:8000/rooms/${room_id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await res.json();
+        if (data.success) {
+            setRooms(rooms.filter((room) => room.id !== room_id));
+        }
+    }
     return(
         <>
             {rooms.length > 0 ? (
@@ -46,6 +59,13 @@ const RoomList = () => {
                                 onClick={() => enterChatRoom(room.socket_id)}
                             >
                                 入室
+                            </button>
+                            <button 
+                                className="flex-shrink-0 bg-red-500 hover:bg-red-700 border-red-500 hover:border-red-700 text-sm border-4 text-white py-1 px-2 rounded" 
+                                type="button"
+                                onClick={() => deleteChatRoom(room.id)}
+                            >
+                                削除
                             </button>
                         </div>
                     ))}

@@ -21,10 +21,6 @@ const ChatRoom = ({ params }: ChatRoomProps) => {
             console.log("WebSocket connection established");
         };
 
-        websocket.onmessage = (event) => {
-            console.log("Message from server: ", event.data);
-        };
-
         websocket.onclose = () => {
             console.log("WebSocket connection closed");
         };
@@ -36,8 +32,6 @@ const ChatRoom = ({ params }: ChatRoomProps) => {
 
     return (
         <div className="flex flex-col h-screen justify-center items-center gap-5">
-            <h1>Chat Room</h1>
-            <p>{params.socket_id}</p>
             <MessageList ws={ws} />
             <MessageInput ws={ws} />
         </div>

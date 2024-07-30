@@ -1,5 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from lib.manager import ConnectionManager
+from repository.webcosket import get_room_manager
 
 router = APIRouter()
 ws_manager = ConnectionManager()
@@ -10,10 +11,12 @@ async def msg(msg: str, client_id: str) -> None:
 
 @router.websocket("/ws/{room_id}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str):
-    await ws_manager.connect(websocket)
+    manager = get_room_manager(room_id)
+    await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            await ws_manager.broadcast(f"New Message : {data}")
+            await manager.send_personal_message(data, websocket)
+            await manager.broadcast(data, websocket)
     except WebSocketDisconnect:
-        ws_manager.disconnect(websocket)
+        manager.disconnect(websocket)
