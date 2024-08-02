@@ -1,5 +1,4 @@
 "use client";
-
 import RoomInput from "./_components/roomInput";
 import RoomList from "./_components/roomList";
 

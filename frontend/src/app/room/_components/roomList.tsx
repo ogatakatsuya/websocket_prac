@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
 type Room = {
     id: number;
@@ -12,23 +13,26 @@ type Room = {
 }
 
 const RoomList = () => {
-    const [rooms, setRooms] = useState<Room[]>([]);
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchRooms = async () => {
-            const res = await fetch("http://localhost:8000/rooms",{
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await res.json();
-            setRooms(data.rooms);
-            console.log(data);
+    const fetchRooms = async () => {
+        const res = await fetch("http://localhost:8000/rooms",{
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if(!res.ok){
+            throw new Error("Network response was not ok")
         }
-        fetchRooms();
-    }, []);
+        const result = await res.json()
+        return result.rooms
+    }
+
+    const { isPending, isError, data, error } = useQuery<boolean, boolean, Room[], string>({
+        queryKey: ["rooms"],
+        queryFn: fetchRooms,
+    })
 
     const enterChatRoom = (socketId: string) => {
         router.push(`/chat/${socketId}`)
@@ -42,15 +46,21 @@ const RoomList = () => {
             },
         });
         const data = await res.json();
-        if (data.success) {
-            setRooms(rooms.filter((room) => room.id !== room_id));
-        }
     }
+
+    if (isPending) {
+        return <span>Loading...</span>
+    }
+    
+    if (isError) {
+        return <span>Error: {error.message}</span>
+    }
+
     return(
         <>
-            {rooms.length > 0 ? (
+            {data.length > 0 ? (
                 <ul className="gap-4">
-                    {rooms.map((room) => (
+                    {data.map((room) => (
                         <div key={room.id} className="flex items-center justify-center m-3 gap-3">
                             <li>Room Name {room.name}</li>
                             <button 
